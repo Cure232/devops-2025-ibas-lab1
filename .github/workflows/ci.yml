@@ -1,0 +1,40 @@
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-html:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Проверка вашего теста с ракетой
+      - name: Run custom rocket test
+        run: |
+          echo "🧪 Testing for rocket emoji..."
+          if grep -q "🚀" index.html; then
+            echo "✅ Rocket emoji found!"
+          else
+            echo "❌ Rocket emoji missing!"
+            exit 1
+          fi
+
+      # Проверка HTML с помощью HTMLHint
+      - name: HTML Lint
+        uses: ericcornelissen/svgo-action@v4
+        with:
+          command: npx htmlhint index.html
+
+      # Проверка ссылок (не битые ли)
+      - name: Check links
+        uses: untitaker/hyperlink@0.1.30
+        with:
+          args: index.html
+
+      # Проверка доступности (a11y)
+      - name: Accessibility audit
+        run: |
+          npx @axe-core/cli index.html || echo "⚠️ Accessibility issues found (non-blocking)"
