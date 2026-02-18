@@ -8,35 +8,46 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
       - name: Add server to known hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -p ${{ secrets.SERVER_SSH_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+      
       - name: Deploy with script
         run: |
           echo "🚀 Deploying release: ${{ github.event.release.tag_name || 'manual' }}"
+          
           # Копируем файлы
           scp -P ${{ secrets.SERVER_SSH_PORT }} \
             index.html \
             nginx.conf \
            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/tmp/
+          
           # Выполняем deploy команды (вместо отдельного скрипта)
           ssh -p ${{ secrets.SERVER_SSH_PORT }} root@${{ secrets.SERVER_HOST }} << 'EOF'
+          
             # Создаем директорию
             sudo mkdir -p /var/www/demo
+            
             # Копируем файлы
             sudo cp /tmp/index.html /var/www/demo/
+            
             # Настраиваем nginx
             sudo cp /tmp/nginx.conf /etc/nginx/sites-available/demo-site
             sudo ln -sf /etc/nginx/sites-available/demo-site /etc/nginx/sites-enabled/
+            
             # Проверяем конфигурацию
             sudo nginx -t
+            
             if [ $? -eq 0 ]; then
               sudo systemctl reload nginx
               echo "✅ Nginx reloaded successfully"
@@ -44,15 +55,19 @@ jobs:
               echo "❌ Nginx config test failed"
               exit 1
             fi
+            
             # Очистка
             rm /tmp/index.html /tmp/nginx.conf
           EOF
+      
       - name: Test deployed site
         run: |
           echo "🌐 Testing site at http://app.emec.course.prafdin.ru"
+          
           # Проверяем через прокси (если доступен извне)
           curl -f http://app.emec.course.prafdin.ru || \
             echo "⚠️ Site not accessible externally, but local check passed"
+          
           # Проверяем наличие ракеты через SSH
           ssh -p ${{ secrets.SERVER_SSH_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} \
             "grep -q '🚀' /var/www/demo/index.html && echo '✅ Rocket found!' || echo '❌ Rocket missing!'"
