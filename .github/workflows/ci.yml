@@ -1,0 +1,83 @@
+name: HTML CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Устанавливаем Node.js для инструментов
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Устанавливаем HTML валидаторы
+      - name: Install HTML validators
+        run: |
+          npm install -g html-validate htmlhint
+
+      # Ваш тест с ракетой
+      - name: Check for rocket emoji
+        run: |
+          echo "🧪 Testing index.html for rocket emoji..."
+          if grep -q "🚀" index.html; then
+            echo "✅ Rocket emoji present"
+          else
+            echo "❌ No rocket emoji found!"
+            exit 1
+          fi
+
+      # Валидация HTML синтаксиса с htmlhint
+      - name: Validate HTML with HTMLHint
+        run: |
+          npx htmlhint index.html || echo "⚠️ HTML validation issues (non-blocking)"
+        continue-on-error: true
+
+      # Проверка с html-validate (более строгий)
+      - name: Validate HTML with html-validate
+        run: |
+          npx html-validate index.html || echo "⚠️ HTML-validate issues (non-blocking)"
+        continue-on-error: true
+
+      # Проверка на пустые ссылки и изображения
+      - name: Check for empty attributes
+        run: |
+          echo "🔍 Checking for empty href/src attributes..."
+          if grep -E "href=\"\"|src=\"\"" index.html; then
+            echo "❌ Found empty href or src attributes!"
+            exit 1
+          else
+            echo "✅ No empty attributes found"
+          fi
+
+      # Проверка закрытых тегов
+      - name: Check for basic HTML structure
+        run: |
+          echo "🔍 Checking basic HTML structure..."
+          # Проверка наличия <html> тега
+          if ! grep -q "<html" index.html; then
+            echo "⚠️ No <html> tag found"
+          fi
+          # Проверка наличия <body> тега  
+          if ! grep -q "<body" index.html; then
+            echo "⚠️ No <body> tag found"
+          fi
+          echo "✅ Basic structure check completed"
+
+      # Проверка что index.html не пустой
+      - name: Check file not empty
+        run: |
+          if [ ! -s index.html ]; then
+            echo "❌ index.html is empty!"
+            exit 1
+          else
+            echo "✅ index.html has content ($(wc -l < index.html) lines)"
+          fi
