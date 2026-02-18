@@ -1,4 +1,4 @@
-name: HTML CI
+name: HTML CI with Docker build and push
 
 on:
   push:
@@ -7,11 +7,15 @@ on:
     branches: [ main, master, develop ]
 
 jobs:
-  test:
+  test-and-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write    # разрешение на публикацию в GHCR
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       # Устанавливаем Node.js для инструментов
       - name: Setup Node.js
@@ -81,3 +85,43 @@ jobs:
           else
             echo "✅ index.html has content ($(wc -l < index.html) lines)"
           fi
+
+      # ----- Линтер Dockerfile (Hadolint) с continue-on-error -----
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+        continue-on-error: true   # не завершать пайплайн при ошибках
+
+      # ----- Сборка Docker образа -----
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

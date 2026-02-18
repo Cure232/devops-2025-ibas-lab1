@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevOps Demo | CI/CD Pipeline</title>
+    <title>DevOps Demo | Лабораторная 3 (Docker)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0b3b5c 0%, #1b6b8f 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -21,132 +21,67 @@
             border-radius: 15px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
-            transition: transform 0.3s ease;
-        }
-        .container:hover {
-            transform: translateY(-5px);
         }
         h1 {
-            color: #4a5568;
+            color: #1b6b8f;
             text-align: center;
             font-size: 2.5em;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #0b3b5c;
             padding-bottom: 15px;
-        }
-        h1 span {
-            display: inline-block;
-            animation: rocket 2s infinite;
-        }
-        @keyframes rocket {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        .info {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 25px 0;
-            border-left: 5px solid #667eea;
         }
         .badge {
             display: inline-block;
-            background: #48bb78;
+            background: #0b3b5c;
             color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            margin-left: 10px;
+            padding: 5px 15px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            margin: 10px 0;
         }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        .feature {
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .feature:hover {
-            background: #edf2f7;
-            transform: scale(1.05);
-        }
-        .feature-icon {
-            font-size: 2em;
-            margin-bottom: 10px;
+        .docker-info {
+            background: #f0f8ff;
+            border-left: 5px solid #0b3b5c;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
         }
         .footer {
             text-align: center;
             margin-top: 30px;
-            color: #718096;
-            font-size: 0.9em;
-        }
-        .version-tag {
-            background: #667eea;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            margin-left: 10px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>
-            <span>🚀</span> DevOps CI/CD Pipeline
-        </h1>
+        <h1>🐳 DevOps Лабораторная №3</h1>
+        <div style="text-align: center;">
+            <span class="badge">Docker</span>
+            <span class="badge">Версия 3.0</span>
+        </div>
         
-        <div class="info">
-            <p><strong>Статус:</strong> Автоматический деплой настроен ✅</p>
-            <p><strong>Версия:</strong> 2.0.0 <span class="version-tag">latest</span></p>
-            <p><strong>Дата обновления:</strong> <span id="date"></span></p>
+        <div class="docker-info">
+            <p><strong>🚀 Что сделано:</strong></p>
+            <ul>
+                <li>Создан Dockerfile для упаковки статического сайта</li>
+                <li>Образ собран локально и запущен с пробросом порта 8181</li>
+                <li>Настроен Healthcheck для мониторинга контейнера</li>
+                <li>Образ опубликован в GitHub Container Registry (ghcr.io)</li>
+            </ul>
         </div>
 
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🔧</div>
-                <h3>CI настроен</h3>
-                <p>GitHub Actions проверяет HTML при каждом push</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🚀</div>
-                <h3>CD работает</h3>
-                <p>Автодеплой при создании релиза</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">📦</div>
-                <h3>Nginx + FRP</h3>
-                <p>Реверс-прокси по адресу course.prafdin.ru, клиент на Ubuntu</p>
-            </div>
-        </div>
-
-        <p style="background: #f0f4f8; padding: 15px; border-radius: 8px; line-height: 1.6;">
-            <strong>Что сделано:</strong><br>
-            • Создан CI workflow для проверки 🚀 в HTML<br>
-            • Настроен CD workflow для деплоя при создании release<br>
-            • Добавлены SSH secrets для доступа к серверу<br>
-            • Автоматическое копирование файлов и перезапуск nginx
+        <p style="text-align: center; font-size: 1.2em;">
+            🚀 Ракета на месте — CI/CD доволен!
         </p>
-
+        
         <div class="footer">
-            <p>Развернуто через GitHub Actions • Сайт доступен по адресу: http://app.emec.course.prafdin.ru</p>
-            <p style="font-size: 0.8em; margin-top: 10px;">🚀 Ракета должна быть на сайте — иначе CI упадет!</p>
+            <p>Запущено в контейнере Docker • Порт 8181</p>
+            <p><span id="date"></span></p>
         </div>
     </div>
 
     <script>
-        document.getElementById('date').textContent = new Date().toLocaleDateString('ru-RU', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        document.getElementById('date').textContent = 'Дата сборки: ' + new Date().toLocaleString('ru-RU');
     </script>
 </body>
 </html>
